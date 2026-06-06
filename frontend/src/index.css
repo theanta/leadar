@@ -1,0 +1,98 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* Canvas & surfaces — warm cream throughout */
+    --canvas: 43 100% 97%;            /* #fffaf0 */
+    --surface-soft: 44 65% 95%;       /* #faf5e8 */
+    --surface-card: 43 52% 92%;       /* #f5f0e0 */
+    --surface-strong: 42 40% 88%;     /* #ebe6d6 */
+
+    /* Shadcn/ui mappings → Clay tokens */
+    --background: 43 100% 97%;        /* canvas */
+    --foreground: 0 0% 4%;            /* ink: #0a0a0a */
+    --card: 43 52% 92%;               /* surface-card */
+    --card-foreground: 0 0% 4%;
+    --border: 0 0% 90%;               /* hairline: #e5e5e5 */
+    --input: 0 0% 90%;
+    --primary: 0 0% 4%;               /* #0a0a0a */
+    --primary-foreground: 0 0% 100%;
+    --secondary: 44 65% 95%;          /* surface-soft */
+    --secondary-foreground: 0 0% 4%;
+    --muted: 44 65% 95%;
+    --muted-foreground: 0 0% 42%;     /* #6a6a6a */
+    --accent: 42 40% 88%;             /* surface-strong */
+    --accent-foreground: 0 0% 4%;
+    --destructive: 0 84% 60%;         /* #ef4444 */
+    --destructive-foreground: 0 0% 100%;
+    --ring: 0 0% 4%;
+    --radius: 12px;
+
+    /* Text scale */
+    --body-strong: 0 0% 10%;          /* #1a1a1a */
+    --body-color: 0 0% 23%;           /* #3a3a3a */
+    --muted-soft: 0 0% 60%;           /* #9a9a9a */
+
+    /* Brand palette */
+    --brand-pink: 339 100% 65%;       /* #ff4d8b */
+    --brand-teal: 180 38% 16%;        /* #1a3a3a */
+    --brand-lavender: 257 67% 79%;    /* #b8a4ed */
+    --brand-peach: 21 100% 76%;       /* #ffb084 */
+    --brand-ochre: 42 78% 60%;        /* #e8b94a */
+    --brand-mint: 162 36% 74%;        /* #a4d4c5 */
+    --brand-coral: 6 100% 68%;        /* #ff6b5a */
+
+    /* Semantic */
+    --success: 142 71% 45%;           /* #22c55e */
+    --warning: 38 92% 50%;            /* #f59e0b */
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  html {
+    @apply antialiased;
+  }
+
+  body {
+    @apply bg-canvas text-foreground font-body;
+    color: hsl(var(--body-color));
+  }
+
+  h1,
+  h2,
+  h3 {
+    @apply font-display font-semibold tracking-tight text-foreground;
+  }
+}
+
+@layer components {
+  .text-label {
+    @apply font-body text-[12px] font-semibold uppercase tracking-[0.1em];
+  }
+
+  .text-link-uppercase {
+    @apply text-label text-foreground hover:text-body-strong transition-colors;
+  }
+
+  .page-title {
+    @apply text-title-lg text-foreground;
+  }
+
+  .page-subtitle {
+    @apply mt-1 text-sm text-muted-foreground;
+  }
+
+  .spec-value {
+    @apply text-display-sm font-medium text-foreground;
+  }
+
+  .table-header {
+    @apply text-label text-muted-foreground;
+  }
+}
