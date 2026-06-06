@@ -4,16 +4,11 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from app.core.config import settings
 from app.database.session import engine
-from app.database.base import Base
 from app.api.routes import leads, jobs, searches, exports, dashboard
-
-import app.models  # noqa: F401 — ensure models are registered before create_all
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    async with engine.begin() as conn:
-        await conn.run_sync(Base.metadata.create_all)
     yield
     await engine.dispose()
 
