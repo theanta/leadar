@@ -16,11 +16,11 @@ export default function MainLayout() {
         <div className="mx-auto flex h-16 max-w-content items-center justify-between px-4 sm:px-6 lg:px-10">
           <div className="flex items-center gap-3">
             <div className="flex h-8 w-8 items-center justify-center rounded-md bg-foreground">
-              <span className="text-[11px] font-bold text-primary-foreground tracking-tight">AS</span>
+              <span className="text-[11px] font-bold text-primary-foreground tracking-tight">LR</span>
             </div>
             <div>
               <p className="text-sm font-semibold leading-none text-foreground tracking-tight">
-                ANTA Signal
+                Leadar
               </p>
               <p className="mt-0.5 text-[11px] text-muted-foreground tracking-wide">
                 Lead Intelligence
@@ -62,7 +62,7 @@ export default function MainLayout() {
       {/* Desktop footer — hidden on mobile */}
       <footer className="hidden md:block shrink-0 border-t border-border bg-surface-soft px-6 py-4 lg:px-10">
         <div className="mx-auto flex max-w-content items-center justify-between">
-          <p className="text-xs text-muted-foreground">ANTA Signal · Lead Intelligence</p>
+          <p className="text-xs text-muted-foreground">Leadar · Lead Intelligence</p>
           <p className="text-xs text-muted-foreground">Internal Tool</p>
         </div>
       </footer>

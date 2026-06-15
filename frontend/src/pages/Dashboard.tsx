@@ -79,7 +79,7 @@ export default function Dashboard() {
     <div className="space-y-8 overflow-y-auto p-6 lg:p-10">
       <div>
         <h1 className="page-title">Dashboard</h1>
-        <p className="page-subtitle">ANTA Lead Intelligence overview</p>
+        <p className="page-subtitle">Leadar overview</p>
       </div>
 
       <div className="grid grid-cols-2 gap-4 lg:grid-cols-4 lg:gap-5">

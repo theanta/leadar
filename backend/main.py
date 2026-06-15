@@ -17,7 +17,7 @@ async def lifespan(app: FastAPI):
 
 
 app = FastAPI(
-    title="ANTA Lead Intelligence System",
+    title="Leadar",
     version="1.0.0",
     description="Internal lead generation and management platform",
     lifespan=lifespan,
