@@ -13,6 +13,7 @@ export function useLeads(page: number, pageSize: number) {
     queryKey: ["leads", page, pageSize, cleanFilters],
     queryFn: () => leadsApi.list(page, pageSize, cleanFilters),
     placeholderData: (prev) => prev,
+    staleTime: 30_000,
   });
 }
 

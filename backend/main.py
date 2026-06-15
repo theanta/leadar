@@ -1,6 +1,7 @@
 from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from sqlalchemy import text
 
 from app.core.config import settings
 from app.database.session import engine
@@ -9,6 +10,8 @@ from app.api.routes import leads, jobs, searches, exports, dashboard
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
+    async with engine.connect() as conn:
+        await conn.execute(text("SELECT 1"))
     yield
     await engine.dispose()
 

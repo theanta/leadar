@@ -12,7 +12,7 @@ const PAGE_SIZE = 25;
 
 export default function Leads() {
   const [page, setPage] = useState(1);
-  const { data, isLoading } = useLeads(page, PAGE_SIZE);
+  const { data, isLoading, isFetching } = useLeads(page, PAGE_SIZE);
   const { selectedLeads, clearSelection } = useLeadStore();
   const [exporting, setExporting] = useState(false);
 
@@ -29,8 +29,8 @@ export default function Leads() {
 
   return (
     <div className="flex h-full flex-col overflow-hidden">
-      <div className="shrink-0 border-b border-border px-6 py-5 lg:px-10">
-        <div className="flex items-center justify-between">
+      <div className="shrink-0 border-b border-border px-4 py-4 sm:px-6 sm:py-5 lg:px-10">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <h1 className="page-title">Leads</h1>
             <p className="page-subtitle">
@@ -38,7 +38,7 @@ export default function Leads() {
               {selectedLeads.size > 0 ? `${selectedLeads.size} selected` : "none selected"}
             </p>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 flex-wrap">
             {selectedLeads.size > 0 && (
               <Button variant="ghost" size="sm" onClick={clearSelection}>
                 <Trash2 className="h-3.5 w-3.5" />
@@ -67,7 +67,7 @@ export default function Leads() {
         </div>
       </div>
 
-      <div className="shrink-0 border-b border-border bg-surface-soft px-6 py-4 lg:px-10">
+      <div className="shrink-0 border-b border-border bg-surface-soft px-4 py-3 sm:px-6 sm:py-4 lg:px-10">
         <LeadFilters />
       </div>
 
@@ -79,6 +79,7 @@ export default function Leads() {
           pageSize={PAGE_SIZE}
           totalPages={data?.total_pages ?? 0}
           isLoading={isLoading}
+          isFetching={isFetching}
           onPageChange={setPage}
         />
       </div>

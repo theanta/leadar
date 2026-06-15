@@ -23,7 +23,57 @@ interface LeadTableProps {
   pageSize: number;
   totalPages: number;
   isLoading: boolean;
+  isFetching?: boolean;
   onPageChange: (p: number) => void;
+}
+
+function MobileLeadCard({ lead }: { lead: Lead }) {
+  const { selectedLeads, toggleSelect, openDrawer } = useLeadStore();
+  const isSelected = selectedLeads.has(lead.id);
+
+  return (
+    <div
+      className="flex items-start gap-3 px-4 py-4 border-b border-border transition-colors active:bg-surface-soft/70 cursor-pointer"
+      onClick={() => openDrawer(lead)}
+    >
+      <input
+        type="checkbox"
+        className="mt-0.5 shrink-0 rounded-sm border-border accent-foreground"
+        checked={isSelected}
+        onChange={() => toggleSelect(lead.id)}
+        onClick={(e) => e.stopPropagation()}
+      />
+      <div className="min-w-0 flex-1">
+        <div className="flex items-start justify-between gap-2">
+          <p className="font-medium text-foreground truncate">{lead.company_name}</p>
+          {lead.industry && (
+            <Badge variant="secondary" className="text-xs font-normal shrink-0">
+              {truncate(lead.industry, 18)}
+            </Badge>
+          )}
+        </div>
+        {(lead.contact_name || lead.contact_title) && (
+          <p className="mt-0.5 text-sm text-muted-foreground truncate">
+            {[lead.contact_name, lead.contact_title].filter(Boolean).join(" · ")}
+          </p>
+        )}
+        {lead.email && (
+          <a
+            href={`mailto:${lead.email}`}
+            className="mt-0.5 block text-xs text-primary hover:underline truncate"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {lead.email}
+          </a>
+        )}
+        <div className="mt-1.5 flex flex-wrap items-center gap-x-2 gap-y-0.5 text-xs text-muted-foreground">
+          {lead.location && <span className="truncate">{lead.location}</span>}
+          <span className="capitalize">{lead.source?.replace("_", " ") ?? "—"}</span>
+          <span>{formatDate(lead.created_at)}</span>
+        </div>
+      </div>
+    </div>
+  );
 }
 
 export function LeadTable({
@@ -33,6 +83,7 @@ export function LeadTable({
   pageSize: _pageSize,
   totalPages,
   isLoading,
+  isFetching,
   onPageChange,
 }: LeadTableProps) {
   const { selectedLeads, toggleSelect, selectAll, clearSelection, openDrawer, setFilters } =
@@ -156,99 +207,144 @@ export function LeadTable({
     );
   }
 
+  const pagination = (
+    <div className="flex items-center justify-between border-t border-border bg-surface-soft px-4 py-3 sm:px-6">
+      <p className="text-xs text-muted-foreground">
+        {selectedLeads.size > 0 ? (
+          <span className="text-primary font-medium">{selectedLeads.size} selected · </span>
+        ) : null}
+        {total} lead{total !== 1 ? "s" : ""}
+      </p>
+      <div className="flex items-center gap-2">
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => onPageChange(page - 1)}
+          disabled={page <= 1}
+        >
+          <ChevronLeft className="h-4 w-4" />
+        </Button>
+        <span className="text-xs text-muted-foreground">
+          {page} / {totalPages || 1}
+        </span>
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => onPageChange(page + 1)}
+          disabled={page >= totalPages}
+        >
+          <ChevronRight className="h-4 w-4" />
+        </Button>
+      </div>
+    </div>
+  );
+
   return (
     <div className="flex flex-col h-full">
-      <div className="flex-1 overflow-auto">
-        <table className="w-full text-sm">
-          <thead className="sticky top-0 z-10 border-b border-border bg-surface-soft">
-            {table.getHeaderGroups().map((hg) => (
-              <tr key={hg.id}>
-                {hg.headers.map((header) => (
-                  <th
-                    key={header.id}
-                    className="table-header whitespace-nowrap px-4 py-3 text-left"
-                    style={{ width: header.getSize() }}
-                  >
-                    {header.isPlaceholder ? null : (
-                      <button
-                        className={`flex items-center gap-1 ${header.column.getCanSort() ? "cursor-pointer select-none hover:text-foreground" : ""}`}
-                        onClick={header.column.getToggleSortingHandler()}
-                      >
-                        {flexRender(header.column.columnDef.header, header.getContext())}
-                        {header.column.getCanSort() && (
-                          <span className="ml-0.5">
-                            {header.column.getIsSorted() === "asc" ? (
-                              <ArrowUp className="h-3 w-3" />
-                            ) : header.column.getIsSorted() === "desc" ? (
-                              <ArrowDown className="h-3 w-3" />
-                            ) : (
-                              <ArrowUpDown className="h-3 w-3 opacity-40" />
-                            )}
-                          </span>
-                        )}
-                      </button>
-                    )}
-                  </th>
-                ))}
-              </tr>
+      {/* ── Mobile card list (hidden on md+) ── */}
+      <div
+        className={`md:hidden flex-1 overflow-auto transition-opacity duration-200 ${
+          isFetching ? "opacity-50" : "opacity-100"
+        }`}
+      >
+        {data.length === 0 ? (
+          <p className="px-4 py-12 text-center text-sm text-muted-foreground">No leads found.</p>
+        ) : (
+          <>
+            <div className="flex items-center gap-3 px-4 py-2 border-b border-border bg-surface-soft">
+              <input
+                type="checkbox"
+                className="rounded-sm border-border accent-foreground"
+                checked={data.length > 0 && data.every((r) => selectedLeads.has(r.id))}
+                onChange={(e) =>
+                  e.target.checked ? selectAll(data.map((r) => r.id)) : clearSelection()
+                }
+              />
+              <span className="text-xs text-muted-foreground font-medium">Select all</span>
+            </div>
+            {data.map((lead) => (
+              <MobileLeadCard key={lead.id} lead={lead} />
             ))}
-          </thead>
-          <tbody>
-            {table.getRowModel().rows.length === 0 ? (
-              <tr>
-                <td colSpan={columns.length} className="px-4 py-12 text-center text-muted-foreground">
-                  No leads found.
-                </td>
-              </tr>
-            ) : (
-              table.getRowModel().rows.map((row) => (
-                <tr
-                  key={row.id}
-                  className="cursor-pointer border-b border-border transition-colors hover:bg-surface-soft/70"
-                  onClick={() => openDrawer(row.original)}
-                >
-                  {row.getVisibleCells().map((cell) => (
-                    <td key={cell.id} className="px-4 py-3">
-                      {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                    </td>
-                  ))}
-                </tr>
-              ))
-            )}
-          </tbody>
-        </table>
+          </>
+        )}
       </div>
 
-      {/* Pagination */}
-      <div className="flex items-center justify-between border-t border-border bg-surface-soft px-6 py-3">
-        <p className="text-xs text-muted-foreground">
-          {selectedLeads.size > 0 ? (
-            <span className="text-primary font-medium">{selectedLeads.size} selected · </span>
-          ) : null}
-          {total} lead{total !== 1 ? "s" : ""}
-        </p>
-        <div className="flex items-center gap-2">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => onPageChange(page - 1)}
-            disabled={page <= 1}
-          >
-            <ChevronLeft className="h-4 w-4" />
-          </Button>
-          <span className="text-xs text-muted-foreground">
-            {page} / {totalPages || 1}
-          </span>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => onPageChange(page + 1)}
-            disabled={page >= totalPages}
-          >
-            <ChevronRight className="h-4 w-4" />
-          </Button>
+      {/* ── Desktop table (hidden below md) ── */}
+      <div className="hidden md:flex flex-col flex-1 overflow-hidden">
+        <div
+          className={`flex-1 overflow-auto transition-opacity duration-200 ${
+            isFetching ? "opacity-50" : "opacity-100"
+          }`}
+        >
+          <table className="w-full text-sm">
+            <thead className="sticky top-0 z-10 border-b border-border bg-surface-soft">
+              {table.getHeaderGroups().map((hg) => (
+                <tr key={hg.id}>
+                  {hg.headers.map((header) => (
+                    <th
+                      key={header.id}
+                      className="table-header whitespace-nowrap px-4 py-3 text-left"
+                      style={{ width: header.getSize() }}
+                    >
+                      {header.isPlaceholder ? null : (
+                        <button
+                          className={`flex items-center gap-1 ${
+                            header.column.getCanSort()
+                              ? "cursor-pointer select-none hover:text-foreground"
+                              : ""
+                          }`}
+                          onClick={header.column.getToggleSortingHandler()}
+                        >
+                          {flexRender(header.column.columnDef.header, header.getContext())}
+                          {header.column.getCanSort() && (
+                            <span className="ml-0.5">
+                              {header.column.getIsSorted() === "asc" ? (
+                                <ArrowUp className="h-3 w-3" />
+                              ) : header.column.getIsSorted() === "desc" ? (
+                                <ArrowDown className="h-3 w-3" />
+                              ) : (
+                                <ArrowUpDown className="h-3 w-3 opacity-40" />
+                              )}
+                            </span>
+                          )}
+                        </button>
+                      )}
+                    </th>
+                  ))}
+                </tr>
+              ))}
+            </thead>
+            <tbody>
+              {table.getRowModel().rows.length === 0 ? (
+                <tr>
+                  <td
+                    colSpan={columns.length}
+                    className="px-4 py-12 text-center text-muted-foreground"
+                  >
+                    No leads found.
+                  </td>
+                </tr>
+              ) : (
+                table.getRowModel().rows.map((row) => (
+                  <tr
+                    key={row.id}
+                    className="cursor-pointer border-b border-border transition-colors hover:bg-surface-soft/70"
+                    onClick={() => openDrawer(row.original)}
+                  >
+                    {row.getVisibleCells().map((cell) => (
+                      <td key={cell.id} className="px-4 py-3">
+                        {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                      </td>
+                    ))}
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
         </div>
       </div>
+
+      {pagination}
     </div>
   );
 }

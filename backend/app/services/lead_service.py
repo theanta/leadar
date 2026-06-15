@@ -5,6 +5,9 @@ from sqlalchemy import select, func, or_
 
 from app.models.lead import Lead
 from app.schemas.lead import LeadCreate, LeadUpdate, LeadListResponse, LeadResponse
+from app.core import cache as _cache
+
+_LEADS_TTL = 30.0
 
 
 async def get_leads(
@@ -19,6 +22,11 @@ async def get_leads(
     sort_by: str = "created_at",
     sort_order: str = "desc",
 ) -> LeadListResponse:
+    cache_key = ("leads", page, page_size, search, industry, location, source, str(job_id), sort_by, sort_order)
+    cached = _cache.get(cache_key)
+    if cached is not None:
+        return cached
+
     query = select(Lead)
     count_query = select(func.count()).select_from(Lead)
 
@@ -62,13 +70,15 @@ async def get_leads(
     result = await db.execute(query)
     leads = result.scalars().all()
 
-    return LeadListResponse(
+    response = LeadListResponse(
         items=[LeadResponse.model_validate(lead) for lead in leads],
         total=total,
         page=page,
         page_size=page_size,
         total_pages=math.ceil(total / page_size) if total > 0 else 0,
     )
+    _cache.set(cache_key, response, ttl=_LEADS_TTL)
+    return response
 
 
 async def get_lead(db: AsyncSession, lead_id: uuid.UUID) -> Lead | None:
@@ -81,6 +91,7 @@ async def create_lead(db: AsyncSession, data: LeadCreate) -> Lead:
     db.add(lead)
     await db.commit()
     await db.refresh(lead)
+    _cache.invalidate_prefix("leads")
     return lead
 
 
@@ -88,6 +99,7 @@ async def bulk_create_leads(db: AsyncSession, leads_data: list[dict], job_id: uu
     leads = [Lead(**{**data, "job_id": job_id}) for data in leads_data]
     db.add_all(leads)
     await db.commit()
+    _cache.invalidate_prefix("leads")
     return len(leads)
 
 
@@ -99,6 +111,7 @@ async def update_lead(db: AsyncSession, lead_id: uuid.UUID, data: LeadUpdate) ->
         setattr(lead, field, value)
     await db.commit()
     await db.refresh(lead)
+    _cache.invalidate_prefix("leads")
     return lead
 
 
@@ -108,6 +121,7 @@ async def delete_lead(db: AsyncSession, lead_id: uuid.UUID) -> bool:
         return False
     await db.delete(lead)
     await db.commit()
+    _cache.invalidate_prefix("leads")
     return True
 
 

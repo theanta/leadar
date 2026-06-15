@@ -15,19 +15,21 @@ export default function Search() {
   const { data: jobs } = useJobs(1, 5);
 
   return (
-    <div className="mx-auto max-w-3xl space-y-8 overflow-y-auto p-6 lg:p-10">
+    <div className="mx-auto max-w-3xl space-y-6 overflow-y-auto p-4 sm:p-6 lg:p-10">
       <div>
         <h1 className="page-title">New Lead Search</h1>
         <p className="page-subtitle">Trigger an Apify scraping job to discover new leads.</p>
       </div>
 
       {lastJobId && (
-        <div className="flex items-center gap-4 rounded-lg border border-brand-mint/40 bg-brand-mint/10 px-4 py-4">
-          <CheckCircle className="h-4 w-4 shrink-0 text-success" />
-          <span className="flex-1 text-sm text-foreground">
-            Search started. Results will appear in Leads once complete.
-          </span>
-          <Button variant="ghost" size="sm" onClick={() => navigate("/jobs")}>
+        <div className="flex flex-col gap-3 rounded-lg border border-brand-mint/40 bg-brand-mint/10 px-4 py-4 sm:flex-row sm:items-center sm:gap-4">
+          <div className="flex items-center gap-3 flex-1">
+            <CheckCircle className="h-4 w-4 shrink-0 text-success" />
+            <span className="text-sm text-foreground">
+              Search started. Results will appear in Leads once complete.
+            </span>
+          </div>
+          <Button variant="ghost" size="sm" className="self-start sm:self-auto" onClick={() => navigate("/jobs")}>
             View jobs
             <ArrowRight className="h-3.5 w-3.5" />
           </Button>
@@ -46,7 +48,7 @@ export default function Search() {
               {jobs?.items.map((job) => (
                 <div
                   key={job.id}
-                  className="flex items-center justify-between py-3 transition-colors hover:bg-surface-soft rounded-md px-2 -mx-2"
+                  className="flex items-start justify-between gap-3 py-3 transition-colors hover:bg-surface-soft rounded-md px-2 -mx-2"
                 >
                   <div className="min-w-0 flex-1">
                     <p className="truncate text-sm font-medium text-foreground">{job.keyword}</p>
@@ -55,7 +57,7 @@ export default function Search() {
                       {formatDate(job.created_at)}
                     </p>
                   </div>
-                  <div className="flex items-center gap-3">
+                  <div className="flex shrink-0 flex-col items-end gap-1 sm:flex-row sm:items-center sm:gap-3">
                     <span className="text-xs text-muted-foreground">{job.total_results} leads</span>
                     <JobStatusBadge status={job.status as JobStatus} />
                   </div>
